@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container w-100">
+    <form id="login_form" action="/login" method="post" class="form">
+        <div class="mt-2">
+            <input class="form-control form-control-lg" name="email" type="email" placeholder="@Почта" required>
+        </div>
+        <div class="mt-2">
+            <input class="form-control form-control-lg" name="password" type="password" placeholder="Пароль" required>
+        </div>
+        <div class="mt-2">
+            <button class="form-control form-control-lg btn btn-outline-dark btn-lg" type="submit">Авторизоваться
+            </button>
+        </div>
+        <div class="mt-2">
+            <button type="button" class="form-control form-control-lg btn btn-outline-dark btn-lg"
+                    onclick="changeForm();">
+                Зарегистрироваться
+            </button>
+        </div>
+    </form>
+    <form id="registration_form" action="/registration" method="post" class="form" style="display:none;">
+        <div class="mt-2">
+            <input class="form-control form-control-lg" name="first_name" type="text" placeholder="Имя" required>
+        </div>
+        <div class="mt-2">
+            <input class="form-control form-control-lg " name="last_name" type="text" placeholder="Фамилия" required>
+        </div>
+        <div class="mt-2">
+            <input class="form-control form-control-lg " name="middle_name" type="text" placeholder="Отчество (не обяз.)">
+        </div>
+        <div class="mt-2">
+            <input class="form-control form-control-lg" name="email" type="email" placeholder="@Почта" required>
+        </div>
+        <div class="mt-2">
+            <input class="form-control form-control-lg" name="password" type="password" placeholder="Пароль" required>
+        </div>
+        <div class="mt-2">
+            <input class="form-control form-control-lg" name="password_again" type="password"
+                   placeholder="Пароль еще раз" required>
+        </div>
+        <div class="mt-2">
+            <select onchange="showGroups(this);" class="form-control border border-success border-2 shadow form-control-lg" name="role" required>
+                {% for role in roles %}
+                <option value="{{role}}">{{role}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if groups | length > 0 %}
+        <div id="group_select" class="mt-2">
+            <select class="form-control form-control-lg" name="group_id">
+                {% for group in groups %}
+                <option value="{{group.id}}">{{group.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="mt-2">
+            <button class="form-control form-control-lg btn btn-outline-dark btn-lg" type="submit">Зарегистрироваться
+            </button>
+        </div>
+        <div class="mt-2">
+            <button class="form-control form-control-lg btn btn-outline-dark btn-lg" onclick="changeForm();">Уже есть
+                учетная
+                запись?
+            </button>
+        </div>
+    </form>
+    {% if message %}
+    <div class="mt-2 text-center">
+        <h2 class="text-danger">{{ message }}</h2>
+    </div>
+    {% endif %}
+</div>
+<script>
+    function showGroups(select){
+    console.log(select.value);
+       if(select.value=='Преподаватель'){
+        document.getElementById('group_select').style.display = "none";
+       } else{
+        document.getElementById('group_select').style.display = "block";
+       }
+    }
+    function changeForm() {
+    if (document.getElementById('registration_form').style.display === 'none'){
+        document.getElementById('registration_form').style.display = 'block';
+        document.getElementById('login_form').style.display = 'none';
+    }else{
+        document.getElementById('registration_form').style.display = 'none';
+        document.getElementById('login_form').style.display = 'block';
+    }
+};
+</script>
+{% endblock %}

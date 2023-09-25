@@ -1,0 +1,205 @@
+<div>
+    <div class="text-center mt-4">
+        <h4 class="display-6">Ведомость по дисциплине -
+            <subject_name class="fw-bold">{{statement.subject.name}}</subject_name>
+        </h4>
+        <h4 class="display-6">Группы -
+            <groups class="fw-bold">{{statement.get_groups_str()}}</groups>
+        </h4>
+    </div>
+    <div class="p-2">
+        <table class="mt-2 table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">ФИО</th>
+                {% for point in statement.points %}
+                <th scope="col">{{point.name}}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for group in statement.groups %}
+            {% for student in group.get_students_with_sort() %}
+            {% if current_user == student %}
+            <tr>
+                <th scope="row">{{loop.index}}</th>
+                <td>{{student.get_full_name()}}</td>
+                {% for point in statement.points %}
+                <td>
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col">Программа</th>
+                            <th scope="col">Отчет</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <form enctype="multipart/form-data" action="/point/{{point.id}}/data/upload"
+                                  method="post">
+                                <td>
+                                    {% if point.find_point_data_by_user_id(student.id) == None %}
+                                    <label>
+                                        <input onchange="form.submit()" name="program_file" type="file"
+                                               style="display:none">
+                                        <i class="bi border btn-light btn btn-lg bi-file-earmark-arrow-up"></i>
+                                    </label>
+                                    {% else %}
+                                    <label>
+                                        <input onchange="form.submit()" name="program_file" type="file"
+                                               style="display:none">
+                                        <i class="{{point.find_point_data_by_user_id(student.id).get_last_program().get_bg_style() if point.find_point_data_by_user_id(student.id).get_last_program() != None }}
+                                        bi border btn-light btn btn-lg bi-file-earmark-arrow-up"></i>
+                                    </label>
+                                    {% if point.find_point_data_by_user_id(student.id).program_grade != None %}
+                                    <div class="bg-light w-50">
+                                        <code style="font-size:20px;" class="m-1 text-dark ">{{point.find_point_data_by_user_id(student.id).program_grade}}</code>
+                                    </div>
+                                    {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if point.find_point_data_by_user_id(student.id) == None %}
+                                    <label>
+                                        <input onchange="form.submit()" name="report_file" type="file"
+                                               style="display:none">
+                                        <i class="bi border btn-light btn btn-lg bi-file-earmark-arrow-up"></i>
+                                    </label>
+                                    {% else %}
+                                    <label>
+                                        <input onchange="form.submit()" name="report_file" type="file"
+                                               style="display:none">
+                                        <i class="{{point.find_point_data_by_user_id(student.id).get_last_report().get_bg_style() if point.find_point_data_by_user_id(student.id).get_last_report() != None }}
+                                         bi border btn-light btn btn-lg bi-file-earmark-arrow-up"></i>
+                                    </label>
+                                    {% if point.find_point_data_by_user_id(student.id).report_grade != None %}
+                                    <div class="bg-light w-50">
+                                        <code style="font-size:20px;" class="m-1 text-dark">{{point.find_point_data_by_user_id(student.id).report_grade}}</code>
+                                    </div>
+                                    {% endif %}
+                                    {% endif %}
+                                </td>
+                            </form>
+                        </tr>
+                        {% if point.find_point_data_by_user_id(student.id) != None %}
+                        {% if point.find_point_data_by_user_id(student.id).remarks|length >0 %}
+                        <div class="modal fade"
+                             id="showPointDataProgramRemarks{{point.find_point_data_by_user_id(student.id).id}}"
+                             tabindex="-1"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Замечания по программе</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% for remark in point.find_point_data_by_user_id(student.id).remarks %}
+                                        {% if remark.is_program_remark() %}
+                                        <blockquote class="remark blockquote shadow p-2 rounded rounded-2">
+                                            <p>{{remark.text}}</p>
+                                            <figcaption class="blockquote-footer">
+                                                {{remark.get_datetime_format_str()}} - {{remark.user.get_full_name()}}
+                                            </figcaption>
+                                        </blockquote>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade"
+                             id="showPointDataReportRemarks{{point.find_point_data_by_user_id(student.id).id}}"
+                             tabindex="-1"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Замечания по отчету</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% for remark in point.find_point_data_by_user_id(student.id).remarks %}
+                                        {% if remark.is_report_remark() %}
+                                        <blockquote class="remark blockquote shadow p-2 rounded rounded-2">
+                                            <p>{{remark.text}}</p>
+                                            <figcaption class="blockquote-footer">
+                                                {{remark.get_datetime_format_str()}} - {{remark.user.get_full_name()}}
+                                            </figcaption>
+                                        </blockquote>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <tr>
+                            <td colspan="1">
+                                <button data-bs-toggle="modal"
+                                        data-bs-target="#showPointDataProgramRemarks{{point.find_point_data_by_user_id(student.id).id}}"
+                                        class="btn">
+                                    <i class="bi bi-clock-history w-100"></i>
+                                </button>
+                            </td>
+                            <td colspan="1">
+                                <button data-bs-toggle="modal"
+                                        data-bs-target="#showPointDataReportRemarks{{point.find_point_data_by_user_id(student.id).id}}"
+                                        class="btn">
+                                    <i class="bi bi-clock-history w-100"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </td>
+                {% endfor %}
+            </tr>
+            {% else %}
+            <tr>
+                <th scope="row">{{loop.index}}</th>
+                <td>{{student.get_full_name()}}</td>
+                {% for point in statement.points %}
+                <td>
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col">Программа</th>
+                            <th scope="col">Отчет</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <code>НЕДОСТУПНО</code>
+                                {% if point.find_point_data_by_user_id(student.id).program_grade != None %}
+                                <div class="bg-light w-50">
+                                    <code style="font-size:20px;" class="m-1 text-dark ">{{point.find_point_data_by_user_id(student.id).program_grade}}</code>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <code>НЕДОСТУПНО</code>
+                                {% if point.find_point_data_by_user_id(student.id).report_grade != None %}
+                                <div class="bg-light w-50">
+                                    <code style="font-size:20px;" class="m-1 text-dark">{{point.find_point_data_by_user_id(student.id).report_grade}}</code>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endif %}
+            {% endfor %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

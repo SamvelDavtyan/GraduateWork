@@ -1,0 +1,276 @@
+<!-- Modal -->
+<div class="modal fade" id="addStatementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создание ведомости</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/statement/add" method="post">
+                    <div class="mb-3">
+                        <label for="semesterInput" class="form-label">Семестр</label>
+                        <input name="semester" type="number" min="1" max="2" class="form-control" id="semesterInput"
+                               aria-describedby="semesterHelp" required>
+                        <div id="semesterHelp" class="form-text">Укажите семестр (1/2)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="yearInput" class="form-label">Год</label>
+                        <input type="date" name="year" class="form-control" id="yearInput" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subjectSelect" class="form-label">Дисциплина</label>
+                        <form action="/statement/add" method="post">
+                            <button type="submit" class="btn btn-primary w-100">Загрузить файл</button>
+                        </form>
+                        <select class="form-control" name="subject_id" id="subjectSelect" required>
+                            {% for subject in subjects %}
+                            <option value="{{subject.id}}">{{subject.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Создать ведомость</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="addGroupInStatementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактирование ведомости</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/statement/{{statement.id}}/groups/add" method="post">
+                    <div class="mb-3">
+                        <label for="groupSelect" class="form-label">Группа</label>
+                        <select class="form-control" name="group_id" id="groupSelect" required>
+                            {% for group in groups %}
+                            <option value="{{group.id}}">{{group.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Добавить группу</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addPointModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактирование ведомости</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/statement/{{statement.id}}/points/add" method="post">
+                    <div class="mb-3">
+                        <div class="mb-3">
+                            <label for="nameInput" class="form-label">Название КТ</label>
+                            <input name="name" type="text" class="form-control" id="nameInput"
+                                   aria-describedby="nameHelp" required>
+                            <div id="nameHelp" class="form-text">Укажите название контрольной точки, например "ЛР1"
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Добавить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <div class="text-center mt-4">
+        <h4 class="display-6">Ведомость по дисциплине -
+            <subject_name class="fw-bold">{{statement.subject.name}}</subject_name>
+        </h4>
+        <h4 class="display-6">Группы -
+            <groups class="fw-bold">{{statement.get_groups_str()}}</groups>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#addGroupInStatementModal">
+                +
+            </button>
+        </h4>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#addPointModal">
+            Добавить контрольную точку
+        </button>
+    </div>
+    <div class="p-2">
+        <table class="mt-2 table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">ФИО</th>
+                {% for point in statement.points %}
+                <th scope="col">{{point.name}}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for group in statement.groups %}
+                {% for student in group.get_students_with_sort() %}
+            <tr>
+                <th scope="row">{{loop.index}}</th>
+                <td>{{student.get_full_name()}}</td>
+                {% for point in statement.points %}
+                {% for point_data in point.point_data_list %}
+                <!-- Modal -->
+                <div class="modal fade" id="addProgramRemarkToPointData{{point_data.id}}" tabindex="-1"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Замечания</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="/point_data/{{point_data.id}}/remarks/add" method="post">
+                                    <div class="mb-3">
+                                        <input name="remark_type" value="PROGRAM" hidden>
+                                        <textarea class="form-control" name="text" aria-describedby="remarkTextHelp"
+                                                  required></textarea>
+                                        <div id="remarkTextHelp" class="form-text">Укажите текст замечания</div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Сохранить</button>
+                                </form>
+                            </div>
+                                    <div class="modal-body">
+                                        {% for remark in point.find_point_data_by_user_id(student.id).remarks %}
+                                        {% if remark.is_program_remark() %}
+                                        <blockquote class="remark blockquote shadow p-2 rounded rounded-2">
+                                            <p>{{remark.text}}</p>
+                                            <figcaption class="blockquote-footer">
+                                                {{remark.get_datetime_format_str()}} - {{remark.user.get_full_name()}}
+                                            </figcaption>
+                                        </blockquote>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal -->
+                <div class="modal fade" id="addReportRemarkToPointData{{point_data.id}}" tabindex="-1"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Замечания</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="/point_data/{{point_data.id}}/remarks/add" method="post">
+                                    <div class="mb-3">
+                                        <input name="remark_type" value="REPORT" hidden>
+                                        <textarea class="form-control" name="text"
+                                                  aria-describedby="reportRemarkTextHelp"
+                                                  required></textarea>
+                                        <div id="reportRemarkTextHelp" class="form-text">Укажите текст замечания</div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Сохранить</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <td>
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col">Программа</th>
+                            <th scope="col">Отчет</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                {% if point.find_point_data_by_user_id(student.id) != None %}
+                                {% if point.find_point_data_by_user_id(student.id).get_last_program() != None %}
+                                <a href="/point_data/{{point.find_point_data_by_user_id(student.id).id}}/program_file/download"><i
+                                        class="{{point.find_point_data_by_user_id(student.id).get_last_program().get_bg_style() if point.find_point_data_by_user_id(student.id).get_last_program() != None }} bi border btn-light btn btn-lg bi-cloud-arrow-down"></i></a>
+                                <form action="/point_data/{{point.find_point_data_by_user_id(student.id).id}}/program_grade/add"
+                                      method="post">
+                                    <div class="d-flex justify-content-around align-items-center mt-2 w-75">
+                                        <select name="grade" onchange="form.submit();" class="form-control grade-report-select">
+                                            {% if point.find_point_data_by_user_id(student.id).program_grade != None %}
+                                            <option selected>
+                                                {{point.find_point_data_by_user_id(student.id).program_grade}}
+                                            </option>
+                                            {% endif %}
+                                            <option>-</option>
+                                            <option>+</option>
+                                            <option>+-</option>
+                                            <option>2</option>
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option>5</option>
+                                        </select>
+                                        <button type="button" data-bs-toggle="modal"
+                                                data-bs-target="#addProgramRemarkToPointData{{point.find_point_data_by_user_id(student.id).id}}"
+                                                class="btn btn-sm btn-outline-primary ms-1"><i class="bi bi-sticky"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                                {% else %}
+                                <code>Пусто</code>
+                                {% endif %}
+                                {% else %}
+                                <code>Пусто</code>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if point.find_point_data_by_user_id(student.id) != None %}
+                                {% if point.find_point_data_by_user_id(student.id).get_last_report() != None %}
+                                <a href="/point_data/{{point.find_point_data_by_user_id(student.id).id}}/report_file/download"><i
+                                        class="{{point.find_point_data_by_user_id(student.id).get_last_report().get_bg_style() if point.find_point_data_by_user_id(student.id).get_last_report() != None }} bi border btn-light btn btn-lg bi-cloud-arrow-down"></i></a>
+                                <form action="/point_data/{{point.find_point_data_by_user_id(student.id).id}}/report_grade/add"
+                                      method="post">
+                                    <div class="d-flex justify-content-around align-items-center mt-2 w-75">
+                                        <select name="grade" onchange="form.submit();" class="form-control grade-report-select">
+                                            {% if point.find_point_data_by_user_id(student.id).report_grade != None %}
+                                            <option selected>
+                                                {{point.find_point_data_by_user_id(student.id).report_grade}}
+                                            </option>
+                                            {% endif %}
+                                            <option>-</option>
+                                            <option>+</option>
+                                            <option>+-</option>
+                                            <option>2</option>
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option>5</option>
+                                        </select>
+                                        <button data-bs-toggle="modal" type="button"
+                                                data-bs-target="#addReportRemarkToPointData{{point.find_point_data_by_user_id(student.id).id}}"
+                                                class="btn btn-sm btn-outline-primary ms-1"><i class="bi bi-sticky"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                                {% else %}
+                                <code>Пусто</code>
+                                {% endif %}
+                                {% else %}
+                                <code>Пусто</code>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

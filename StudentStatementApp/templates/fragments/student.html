@@ -1,0 +1,7 @@
+<div class="mb-2 mt-2 p-2">
+    <ul class="list-group mb-2">
+        {% for statement in current_user.get_my_statements() %}
+        <a href="/statement/{{statement.id}}" class="statement-link list-group-item">{{statement}}</a>
+        {% endfor %}
+    </ul>
+</div>

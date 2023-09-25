@@ -1,0 +1,19 @@
+#footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+.statement-link{
+    font-size:24px;
+}
+.remark{
+    font-size:16px;
+}
+
+#grade-from{
+float:left;
+}
+
+.grade-report-select{
+min-width:3rem;
+}

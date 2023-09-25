@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div>
+    {% include 'fragments/navbar.html' %}
+    {% if message %}
+    <div class="alert alert-primary fade show mt-2 mb-2" role="alert">
+        {{message}}
+    </div>
+    {% endif %}
+
+    {% if current_user.is_teacher() %}
+    {% include 'fragments/teacher.html' %}
+    {% else %}
+    {% include 'fragments/student.html' %}
+    {% endif %}
+    {% include 'fragments/footer.html' %}
+</div>
+{% endblock %}

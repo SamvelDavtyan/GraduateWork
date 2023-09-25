@@ -1,0 +1,43 @@
+<!-- Modal -->
+<div class="modal fade" id="addStatementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создание ведомости</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/statement/add" method="post">
+                    <div class="mb-3">
+                        <label for="semesterInput" class="form-label">Семестр</label>
+                        <input name="semester" type="number" min="1" max="2" class="form-control" id="semesterInput"
+                               aria-describedby="semesterHelp" required>
+                        <div id="semesterHelp" class="form-text">Укажите семестр (1/2)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="yearInput" class="form-label">Год</label>
+                        <input type="date" name="year" class="form-control" id="yearInput" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subjectSelect" class="form-label">Дисциплина</label>
+                        <select class="form-control" name="subject_id" id="subjectSelect" required>
+                            {% for subject in subjects %}
+                            <option value="{{subject.id}}">{{subject.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Создать ведомость</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-2 mt-2 p-2">
+    <ul class="list-group mb-2">
+        {% for statement in statements %}
+        <a href="/statement/{{statement.id}}" class="statement-link list-group-item">
+            {{statement}}</a>
+        {% endfor %}
+    </ul>
+</div>
